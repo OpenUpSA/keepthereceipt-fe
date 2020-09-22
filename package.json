@@ -1,0 +1,12 @@
+{
+  "name": "keepthereceipt-fe",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:OpenUpSA/keepthereceipt-fe.git",
+  "author": "JD Bothma <jbothma@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "parcel-bundler": "^1.12.4"
+  }
+}

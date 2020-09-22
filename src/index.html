@@ -469,27 +469,23 @@ border-radius:2px;
 	}
 .scroll {
 	overflow-y: scroll;
-	overflow-x: hidden; 
-} 
+	overflow-x: hidden;
+}
 </style>
       </div>
       <div class="w-embed w-script">
-        <script>
-$('.filter-search__box').submit(function() {
-  return false;
-});
 </script>
         <script>
 document.addEventListener('DOMContentLoaded', ()=>{
  document.querySelectorAll('.advanced-search').forEach(trigger => {
-  trigger.addEventListener('click', function(){ 
-    this.x = ((this.x || 0) + 1)%2; 
-    if(this.x){ 
+  trigger.addEventListener('click', function(){
+    this.x = ((this.x || 0) + 1)%2;
+    if(this.x){
       document.querySelectorAll('.advanced-filters').forEach(target => target.classList.add('open'));
     }
-    else{ 
+    else{
       document.querySelectorAll('.advanced-filters').forEach(target => target.classList.remove('open'));
-    } 
+    }
   });
  });
 });
@@ -506,20 +502,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
 document.addEventListener('DOMContentLoaded', ()=>{
  // on .filter--supplier click
  document.querySelectorAll('.filter--supplier').forEach(trigger => {
-  trigger.addEventListener('click', function(){ 
+  trigger.addEventListener('click', function(){
   // on every click
     document.querySelectorAll('.filter--supplier').forEach(target => target.classList.add('open'));
     document.querySelectorAll('.search__dropdown--supplier').forEach(target => target.classList.add('open'));
-    document.querySelectorAll('.search-deselect').forEach(target => target.classList.add('open')); 
+    document.querySelectorAll('.search-deselect').forEach(target => target.classList.add('open'));
   });
  });
  // on .search-deselect click
  document.querySelectorAll('.search-deselect').forEach(trigger => {
-  trigger.addEventListener('click', function(){ 
+  trigger.addEventListener('click', function(){
   // on every click
     document.querySelectorAll('.filter--supplier').forEach(target => target.classList.remove('open'));
     document.querySelectorAll('.search__dropdown--supplier').forEach(target => target.classList.remove('open'));
-    document.querySelectorAll('.search-deselect').forEach(target => target.classList.remove('open')); 
+    document.querySelectorAll('.search-deselect').forEach(target => target.classList.remove('open'));
   });
  });
 });
@@ -570,8 +566,9 @@ $(clickTargetSelector)
 })();
 $('.filter-search__box').submit(function() {
   return false;
-});  
+});
 */
 </script>
+<script src="js/index.js" defer></script>
 </body>
 </html>
