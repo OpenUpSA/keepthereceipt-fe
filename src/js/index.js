@@ -259,7 +259,7 @@ class PageState {
       this.loadMoreButton.remove();
   }
 
-  updateResults(url) {
+  updateSearch(url) {
     this.resetResults();
 
     if (this.listRequest !== null)
@@ -269,7 +269,7 @@ class PageState {
       .done((response) => {
         this.populateDownloadCSVButton(response);
         this.numResultsContainer.text(`${response.results.length} of ${response.count}`);
-        const nextCallback = response.next ? () => this.updateResultList(response.next) : null;
+        const nextCallback = response.next ? () => this.updateSearch(response.next) : null;
         this.resultsList.addResults(response.results, nextCallback);
         this.resetFacets();
         this.updateFacetOptions(response.meta.facets);
@@ -304,7 +304,7 @@ class PageState {
     if (pushHistory)
       this.pushState();
 
-    this.updateResults(buildListSearchURL());
+    this.updateSearch(buildListSearchURL());
   };
 
   populateDownloadCSVButton(response) {
