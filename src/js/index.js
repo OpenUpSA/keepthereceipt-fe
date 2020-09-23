@@ -27,17 +27,6 @@
   information in the console to notice and understand errors.
 /***************************************************************/
 
-
-const pageState = {
-  filters: null,
-  // sortField: null,
-  listRequest: null,
-  resultRowTemplate: null,
-  dropdownItemTemplate: null,
-  loadMoreButton: null,
-  loadMoreButtonTemplate: null,
-};
-
 const baseLocation = "https://data.keepthereceipt.org.za/api/purchase_records/";
 
 const facetPlurals = {
@@ -48,35 +37,6 @@ const facetPlurals = {
   primary_funding_source: "funding sources",
 };
 
-function onPopstate(event) {
-  loadSearchStateFromCurrentURL();
-  triggerSearch(false);
-}
-
-function pushState() {
-  window.history.pushState(null, "", urlFromSearchState());
-}
-
-function loadSearchStateFromCurrentURL() {
-  const queryString = window.location.search.substring(1);
-  const params = new URLSearchParams(queryString);
-
-  const textQuery = params.get("q");
-  if (textQuery)
-    $("#Infrastructure-Search-Input").val(textQuery);
-
-  const filterParams = params.getAll("filter");
-  pageState.filters = {};
-  filterParams.forEach(param => {
-    const pieces = param.split(/:/);
-    const key = pieces.shift();
-    const val = pieces.join(':');
-    pageState.filters[key] = val;
-  });
-
-  // const sortField = params.get("order_by");
-  // pageState.sortField = sortField || "status_order";
-}
 
 function urlFromSearchState() {
   var params = new URLSearchParams();
@@ -91,50 +51,17 @@ function urlFromSearchState() {
   return `${window.location.protocol}//${window.location.host}${window.location.pathname}?${queryString}`;
 }
 
-function clearFilters() {
-  pageState.filters = {};
-  $("#Infrastructure-Search-Input").val("");
-  triggerSearch();
-}
-
 
 function buildListSearchURL() {
   var params = new URLSearchParams();
-  params.set("q", $("#Infrastructure-Search-Input").val());
-  for (let fieldName in pageState.filters) {
-    params.set(fieldName, pageState.filters[fieldName]);
-  }
-  params.set("fields", "url_path,name,status,estimated_completion_date");
   // params.set("ordering", pageState.sortField);
   params.set("limit", "20");
   return baseLocation + "?" + params.toString();
 }
 
-function updateResultList(url) {
-  resetResultList();
-
-  if (pageState.listRequest !== null)
-    pageState.listRequest.abort();
-
-  pageState.listRequest = $.get(url)
-    .done(function(response) {
-      populateDownloadCSVButton(response);
-      getNumResultsContainer().text(`${response.results.length} of ${response.count}`);
-      addListResults(response);
-      resetFacets();
-      showFacetResults(response);
-    })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-      if (textStatus !== "abort") {
-        alert("Something went wrong when searching. Please try again.");
-        console.error( jqXHR, textStatus, errorThrown );
-      }
-    });
-}
-
 // const getNoResultsMessage = () => $("#result-list-container * .w-dyn-empty");
-const getAllResultListItems = () => $("#result-list-container .narrow-card_wrapper");
-const getNumResultsContainer = () => $("#results-value strong");
+
+
 
 const fullTextNameToQueryField = {
   "Filter-by-supplier": "supplier_full_text",
@@ -143,17 +70,43 @@ const fullTextNameToQueryField = {
   "Filter-by-procurement-method": "procurement_method_full_text",
 };
 
+class DropdownOption {
+  constructor(template, optionItem) {
+    this.element = template.clone();
+    this.element.find(".dropdown-link__text").text(optionItem.label);
+    this.element.find(".facet-count").text(optionItem.count);
+    if (optionItem.selected !== true) {
+      this.element.find(".dropdown-link__check div").removeClass("fa fa-check");
+    }
+  }
+}
+
 class DropdownField {
-  constructor(element, submitCallback) {
+  constructor(element, queryField) {
     this.element = element;
-    this.submitCallback = [submitCallback];
+    this.queryField = queryField;
+    this.submitCallbacks = [];
+    this.optionTemplate = element.find(".dropdown-list__active").clone();
+    this.optionTemplate.find(".dropdown-link__text").text("");
+    this.optionTemplate.find(".dropdown-link__text + div").addClass("facet-count").text("");
+
+    this.reset();
+  }
+
+  addSubmitCallback(callback) {
+    this.submitCallbacks.push(callback);
   }
 
   updateOptions(options) {
+    options.foreach(optionItem => {
+      const option = new DropdownOption(optionItem);
+      optionEl.find(".dropdown-list__inner").append(option.element);
+    });
   }
 
   reset() {
-
+    this.element.find(".dropdown-list__active").remove();
+    this.element.find(".dropdown-list__links").remove();
   }
 }
 
@@ -205,71 +158,159 @@ class PurchaseRecord {
   }
 }
 
-function resetFacets() {
-  resetDropdown("#government-dropdown");
-  resetDropdown("#department-dropdown");
-  resetDropdown("#sector-dropdown");
-  resetDropdown("#status-dropdown");
-  resetDropdown("#primary-funding-source-dropdown");
-}
+class ResultsList {
+  constructor() {
+    this.loadMoreButton = null;
+    this.loadMoreButtonTemplate = null;
+    this.resultRowTemplate = null;
+    const rows = $(".row-dropdown");
+    this.resultRowTemplate = rows.first().clone();
+    rows.remove();
+    const loadMoreButtonDemo = $(".load-more");
+    this.loadMoreButtonTemplate = loadMoreButtonDemo.clone();
+    loadMoreButtonDemo.remove();
 
-function resetResultList() {
-  getNumResultsContainer().text("...");
-  getAllResultListItems().remove();
-  // getNoResultsMessage().hide();
-  if (pageState.loadMoreButton)
-    pageState.loadMoreButton.remove();
-}
+  }
 
-function triggerSearch(pushHistory = true) {
-  if (pushHistory)
-    pushState();
-
-  updateResultList(buildListSearchURL());
-};
-
-function populateDownloadCSVButton(response) {
-  $("#search-results-download-button").attr("href", response.csv_download_url);
-}
-
-function addListResults(response) {
-  if (response.results.length) {
-    // getNoResultsMessage().hide();
-    response.results.forEach(function(item) {
-      let purchaseRecord = new PurchaseRecord(pageState.resultRowTemplate, item);
-      $(".filtered-list").append(purchaseRecord.element);
-    });
-
-    if (response.next) {
-      pageState.loadMoreButton = pageState.loadMoreButtonTemplate.clone();
-      pageState.loadMoreButton.on("click", (e) => {
-        e.preventDefault();
-        updateResultList(response.next);
+  addResults(results, nextCallback) {
+    if (results.length) {
+      // getNoResultsMessage().hide();
+      results.forEach(item => {
+        let purchaseRecord = new PurchaseRecord(this.resultRowTemplate, item);
+        $(".filtered-list").append(purchaseRecord.element);
       });
-      $(".filtered-list").append(pageState.loadMoreButton);
+
+      if (nextCallback !== null) {
+        this.loadMoreButton = this.loadMoreButtonTemplate.clone();
+        this.loadMoreButton.on("click", (e) => {
+          e.preventDefault();
+          nextCallback();
+        });
+        $(".filtered-list").append(this.loadMoreButton);
+      }
+    } else {
+      // getNoResultsMessage().show();
     }
-  } else {
-    // getNoResultsMessage().show();
+  }
+
+  reset() {
   }
 }
 
-function showFacetResults(response) {
-  updateDropdown("#government-dropdown", response.fields["government_label"], "government_label");
-  updateDropdown("#department-dropdown", response.fields["department"], "department");
-  updateDropdown("#sector-dropdown", response.fields["sector"], "sector");
-  updateDropdown("#primary-funding-source-dropdown", response.fields["primary_funding_source"], "primary_funding_source");
+class PageState {
+  constructor() {
+    this.listRequest = null;
+    this.activeFiltersWrapper = $(".current-filters__wrap");
+    this.noFilterChip = $(".no-filter");
+    this.activeFilterChipTemplate = $(".current-filter").clone();
+    this.activeFiltersWrapper.empty();
+    this.numResultsContainer = $("#results-value strong");
+    $(".filter__download").hide(); // for now
+    this.resultsList = new ResultsList();
+    window.addEventListener("popstate", this.handleHistoryPopstate);
 
-  // const statusOptions = sortByOrderArray(statusOrder, "text", response.fields["status"]);
-  updateDropdown("#status-dropdown", statusOptions, "status");
-}
+    $(".search__input").each((i, el) => {
+      const instance = new FullTextSearchField($(el), instance => this.triggerSearch());
+    });
 
-function resetDropdown(selector) {
-  $(selector).find(".text-block").text("");
-  $(selector).find(".dropdown-link").remove();
-}
+    this.facets = {
+      buyerName: new DropdownField($("#filter-buyer-name"), "buyer_name"),
+      facility: new DropdownField($("#filter-facility"), "implementation_location_facility"),
+      districtMuni: new DropdownField($("#filter-district-muni"), "implementation_location_district_municipality"),
+      localMuni: new DropdownField($("#filter-local-muni"), "implementation_location_local_municipality"),
+      // other: new DropdownField($("#filter-facility"), "implementation_location_other"),
+      province: new DropdownField($("#filter-province"), "implementation_location_province"),
+      repository: new DropdownField($("#filter-data-repository"), "dataset_version__dataset__repository__name"),
+      dataset: new DropdownField($("#filter-source-dataset"), "dataset_version__dataset__name"),
+    };
 
-function getSelectedOption(fieldName) {
-  return pageState.filters[fieldName];
+    this.resetFacets();
+    this.resultsList.reset();
+    this.loadSearchStateFromCurrentURL();
+    //this.initSortDropdown();
+    this.triggerSearch(false);
+
+  }
+
+  updateFacetOptions(facets) {
+    this.facets.buyerName.updateOptions(facets[this.facets.buyerName.queryField]);
+    this.facets.facility.updateOptions(facets[this.facets.facility.queryField]);
+    this.facets.districtMuni.updateOptions(facets[this.facets.districtMuni.queryField]);
+    this.facets.localMuni.updateOptions(facets[this.facets.localMuni.queryField]);
+    this.facets.province.updateOptions(facets[this.facets.province.queryField]);
+    this.facets.repository.updateOptions(facets[this.facets.repository.queryField]);
+    this.facets.dataset.updateOptions(facets[this.facets.dataset.queryField]);
+  }
+  resetFacets() {
+    this.facets.buyerName.reset();
+    this.facets.facility.reset();
+    this.facets.districtMuni.reset();
+    this.facets.localMuni.reset();
+    this.facets.province.reset();
+    this.facets.repository.reset();
+    this.facets.dataset.reset();
+  }
+
+  resetResults() {
+    this.numResultsContainer.text("...");
+
+    // getNoResultsMessage().hide();
+    if (this.loadMoreButton)
+      this.loadMoreButton.remove();
+  }
+
+  updateResults(url) {
+    this.resetResults();
+
+    if (this.listRequest !== null)
+      this.listRequest.abort();
+
+    this.listRequest = $.get(url)
+      .done((response) => {
+        this.populateDownloadCSVButton(response);
+        this.numResultsContainer.text(`${response.results.length} of ${response.count}`);
+        const nextCallback = response.next ? () => this.updateResultList(response.next) : null;
+        this.resultsList.addResults(response.results, nextCallback);
+        this.resetFacets();
+        this.updateFacetOptions(response.meta.facets);
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+        if (textStatus !== "abort") {
+          alert("Something went wrong when searching. Please try again.");
+          console.error( jqXHR, textStatus, errorThrown );
+        }
+      });
+  }
+
+  handleHistoryPopstate(event) {
+    this.loadSearchStateFromCurrentURL();
+    this.triggerSearch(false);
+  }
+
+  pushState() {
+    window.history.pushState(null, "", urlFromSearchState());
+  }
+
+  loadSearchStateFromCurrentURL() {
+    const queryString = window.location.search.substring(1);
+    const params = new URLSearchParams(queryString);
+
+
+    // const sortField = params.get("order_by");
+    // pageState.sortField = sortField || "status_order";
+  }
+
+  triggerSearch(pushHistory = true) {
+    if (pushHistory)
+      this.pushState();
+
+    this.updateResults(buildListSearchURL());
+  };
+
+  populateDownloadCSVButton(response) {
+    $("#search-results-download-button").attr("href", response.csv_download_url);
+  }
+
 }
 
 function updateDropdown(selector, options, fieldName) {
@@ -288,17 +329,6 @@ function updateDropdown(selector, options, fieldName) {
   } else {
     currentSelectionLabel.text(selectedOption);
   }
-
-  // Add "clear filter" option
-  const optionElement = pageState.dropdownItemTemplate.clone();
-  optionElement.find(".search-dropdown_label").text("All " + facetPlurals[fieldName]);
-  optionElement.click(function(e) {
-    e.preventDefault();
-    delete pageState.filters[fieldName];
-    optionContainer.removeClass("w--open");
-    triggerSearch();
-  });
-  optionContainer.append(optionElement);
 
   options.forEach(function (option) {
     const optionElement = pageState.dropdownItemTemplate.clone();
@@ -344,50 +374,4 @@ function updateDropdown(selector, options, fieldName) {
 // }
 
 
-function searchPage(pageData) {
-
-  /** Get templates of dynamically inserted elements **/
-
-  const rows = $(".row-dropdown");
-  pageState.resultRowTemplate = rows.first().clone();
-  rows.remove();
-  const loadMoreButtonDemo = $(".load-more");
-  pageState.loadMoreButtonTemplate = loadMoreButtonDemo.clone();
-  loadMoreButtonDemo.remove();
-
-  pageState.dropdownItemTemplate = $(".dropdown-list__active").clone();
-  $(".dropdown-list__active").remove();
-  $(".dropdown-list__links").remove();
-  pageState.dropdownItemTemplate.find(".dropdown-link__text").text("");
-  pageState.dropdownItemTemplate.find(".dropdown-link__text + div").addClass("facet-count").text("");
-  pageState.activeFiltersWrapper = $(".current-filters__wrap");
-  pageState.noFilterChip = $(".no-filter");
-  pageState.activeFilterChipTemplate = $(".current-filter").clone();
-  pageState.activeFiltersWrapper.empty();
-
-
-  $(".filter__download").hide(); // for now
-
-  /** initialise stuff **/
-
-  $(".search__input").each((i, el) => {
-    const instance = new FullTextSearchField($(el), instance => triggerSearch());
-  });
-  window.addEventListener("popstate", onPopstate);
-
-  /**
-   * Search on page load
-   *
-   * Ordering may be important based on setting up and depending on pageState.
-   */
-
-
-  resetFacets();
-  resetResultList();
-  loadSearchStateFromCurrentURL();
-  //initSortDropdown();
-  triggerSearch(false);
-
-} // end search page
-
-searchPage();
+const pageState = new PageState();
