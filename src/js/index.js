@@ -36,7 +36,7 @@ const pageState = {
   dropdownItemTemplate: null,
 };
 
-const baseLocation = "http://data.keepthereceipt.org.za/api/purchase_records/";
+const baseLocation = "https://data.keepthereceipt.org.za/api/purchase_records";
 
 const facetPlurals = {
   government_label: "governments",
@@ -124,12 +124,13 @@ function updateResultList(url) {
     });
 }
 
-const getNoResultsMessage = () => $("#result-list-container * .w-dyn-empty");
-const getLoadMoreResultsButton = () => $("#load-more-results-button");
+// const getNoResultsMessage = () => $("#result-list-container * .w-dyn-empty");
+const getLoadMoreResultsButton = () => $(".load-more");
 const getAllResultListItems = () => $("#result-list-container .narrow-card_wrapper");
+const getNumResultsContainer = () => $("#results-value");
 
 function resetFacets() {
-  $("#num-matching-projects-field").text("");
+  getNumResultsContainer().text("...");
   resetDropdown("#government-dropdown");
   resetDropdown("#department-dropdown");
   resetDropdown("#sector-dropdown");
@@ -139,7 +140,7 @@ function resetFacets() {
 
 function resetResultList() {
   getAllResultListItems().remove();
-  getNoResultsMessage().hide();
+  // getNoResultsMessage().hide();
   getLoadMoreResultsButton()
     .hide()
     .off("click");
@@ -161,7 +162,7 @@ function populateDownloadCSVButton(response) {
 
 function addListResults(response) {
   if (response.results.length) {
-    getNoResultsMessage().hide();
+    // getNoResultsMessage().hide();
     response.results.forEach(function(project) {
       var resultItem = pageState.resultRowTemplate.clone();
       resultItem.attr("href", project.url_path);
@@ -182,12 +183,12 @@ function addListResults(response) {
       nextButton.show();
     }
   } else {
-    getNoResultsMessage().show();
+    // getNoResultsMessage().show();
   }
 }
 
 function showFacetResults(response) {
-  $("#num-matching-projects-field").text(response.objects.count);
+  getNumResultsContainer.text(response.objects.count);
   updateDropdown("#government-dropdown", response.fields["government_label"], "government_label");
   updateDropdown("#department-dropdown", response.fields["department"], "department");
   updateDropdown("#sector-dropdown", response.fields["sector"], "sector");
@@ -291,7 +292,10 @@ function searchPage(pageData) {
   $(".dropdown-list__links").remove();
   pageState.dropdownItemTemplate.find(".dropdown-link__text").text("");
   pageState.dropdownItemTemplate.find(".dropdown-link__text + div").addClass("facet-count").text("");
-
+  pageState.activeFiltersWrapper = $(".current-filters__wrap");
+  pageState.noFilterChip = $(".no-filter");
+  pageState.activeFilterChipTemplate = $(".current-filter").clone();
+  pageState.activeFiltersWrapper.empty();
 
   /** initialise stuff **/
 
