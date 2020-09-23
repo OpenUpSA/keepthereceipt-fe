@@ -173,6 +173,23 @@ class PurchaseRecord {
     this.element.find(".row-title").text(resultsItem.supplier_name);
     this.element.find(".row-body").text(resultsItem.buyer_name);
     this.element.find(".row-body").text(resultsItem.amount_value_zar);
+
+    // expand/collapse
+    const rowContentEl = this.element.find(".row-content");
+    rowContentEl.removeAttr("style");
+    rowContentEl.hide();
+    const expandButton = this.element.find(".row-icon-open");
+    const collapseButton = this.element.find(".row-icon-close");
+    expandButton.click(() => {
+      expandButton.hide();
+      collapseButton.show();
+      rowContentEl.slideDown();
+    });
+    collapseButton.click(() => {
+      expandButton.show();
+      collapseButton.hide();
+      rowContentEl.slideUp();
+    });
   }
 }
 
