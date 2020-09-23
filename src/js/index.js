@@ -143,6 +143,20 @@ const fullTextNameToQueryField = {
   "Filter-by-procurement-method": "procurement_method_full_text",
 };
 
+class DropdownField {
+  constructor(element, submitCallback) {
+    this.element = element;
+    this.submitCallback = [submitCallback];
+  }
+
+  updateOptions(options) {
+  }
+
+  reset() {
+
+  }
+}
+
 class FullTextSearchField {
   constructor(element, submitCallback) {
     this.element = element;
@@ -176,25 +190,22 @@ class PurchaseRecord {
 
     // expand/collapse
     const rowContentEl = this.element.find(".row-content");
+    const accordionToggle = this.element.find(".row-dropdown__toggle");
+    const expandIcon = this.element.find(".row-icon-open");
+    const collapseIcon = this.element.find(".row-icon-close");
     rowContentEl.removeAttr("style");
     rowContentEl.hide();
-    const expandButton = this.element.find(".row-icon-open");
-    const collapseButton = this.element.find(".row-icon-close");
-    expandButton.click(() => {
-      expandButton.hide();
-      collapseButton.show();
-      rowContentEl.slideDown();
-    });
-    collapseButton.click(() => {
-      expandButton.show();
-      collapseButton.hide();
-      rowContentEl.slideUp();
+    expandIcon.show();
+    collapseIcon.hide();
+    accordionToggle.click(() => {
+      expandIcon.toggle();
+      collapseIcon.toggle();
+      rowContentEl.slideToggle();
     });
   }
 }
 
 function resetFacets() {
-  getNumResultsContainer().text("...");
   resetDropdown("#government-dropdown");
   resetDropdown("#department-dropdown");
   resetDropdown("#sector-dropdown");
@@ -203,6 +214,7 @@ function resetFacets() {
 }
 
 function resetResultList() {
+  getNumResultsContainer().text("...");
   getAllResultListItems().remove();
   // getNoResultsMessage().hide();
   if (pageState.loadMoreButton)
