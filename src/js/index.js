@@ -36,7 +36,7 @@ const pageState = {
   dropdownItemTemplate: null,
 };
 
-const baseLocation = "https://data.keepthereceipt.org.za/api/purchase_records";
+const baseLocation = "https://data.keepthereceipt.org.za/api/purchase_records/";
 
 const facetPlurals = {
   government_label: "governments",
@@ -109,12 +109,18 @@ function buildListSearchURL() {
 }
 
 function updateResultList(url) {
+  resetResultList();
+
   if (pageState.listRequest !== null)
     pageState.listRequest.abort();
+
   pageState.listRequest = $.get(url)
     .done(function(response) {
       populateDownloadCSVButton(response);
+      getNumResultsContainer().text(`${response.results.length} of ${response.count}`);
       addListResults(response);
+      resetFacets();
+      showFacetResults(response);
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
       if (textStatus !== "abort") {
@@ -127,7 +133,38 @@ function updateResultList(url) {
 // const getNoResultsMessage = () => $("#result-list-container * .w-dyn-empty");
 const getLoadMoreResultsButton = () => $(".load-more");
 const getAllResultListItems = () => $("#result-list-container .narrow-card_wrapper");
-const getNumResultsContainer = () => $("#results-value");
+const getNumResultsContainer = () => $("#results-value strong");
+
+const fullTextNameToQueryField = {
+  "Filter-by-supplier": "supplier_full_text",
+  "Filter-by-director-name": "directors_full_text",
+  "Filter-by-item-description": "description_full_text",
+  "Filter-by-procurement-method": "procurement_method_full_text",
+};
+
+class FullTextSearchField {
+  constructor(element, submitCallback) {
+    this.element = element;
+    this.submitCallbacks = [submitCallback];
+
+    this.element.find(".search__bar").keypress(e => {
+      const key = e.which;
+      if (key == 13) {  // the enter key code
+        e.preventDefault();
+        this.submit();
+      }
+    });
+
+    this.element.find(".search__add-filter").on("click", (e) => {
+      e.preventDefault();
+      this.submit();
+    });
+  }
+
+  submit() {
+    this.submitCallbacks.map(callback => callback(this));
+  }
+}
 
 function resetFacets() {
   getNumResultsContainer().text("...");
@@ -150,10 +187,7 @@ function triggerSearch(pushHistory = true) {
   if (pushHistory)
     pushState();
 
-  resetResultList();
-  response = updateResultList(buildListSearchURL());
-  resetFacets();
-  showFacetResults(response);
+  updateResultList(buildListSearchURL());
 };
 
 function populateDownloadCSVButton(response) {
@@ -163,9 +197,8 @@ function populateDownloadCSVButton(response) {
 function addListResults(response) {
   if (response.results.length) {
     // getNoResultsMessage().hide();
-    response.results.forEach(function(project) {
+    response.results.forEach(function(item) {
       var resultItem = pageState.resultRowTemplate.clone();
-      resultItem.attr("href", project.url_path);
       resultItem.find(".narrow-card_title").text(project.name);
       resultItem.find(".narrow-card_middle-column:first").text(project.status);
       resultItem.find(".narrow-card_middle-column:last").text(project.estimated_completion_date);
@@ -188,7 +221,6 @@ function addListResults(response) {
 }
 
 function showFacetResults(response) {
-  getNumResultsContainer.text(response.objects.count);
   updateDropdown("#government-dropdown", response.fields["government_label"], "government_label");
   updateDropdown("#department-dropdown", response.fields["department"], "department");
   updateDropdown("#sector-dropdown", response.fields["sector"], "sector");
@@ -297,20 +329,12 @@ function searchPage(pageData) {
   pageState.activeFilterChipTemplate = $(".current-filter").clone();
   pageState.activeFiltersWrapper.empty();
 
+  $(".filter__download").hide(); // for now
+
   /** initialise stuff **/
 
-
-  /** Set up search triggering events **/
-
-  $(".search__bar").keypress(function (e) {
-    var key = e.which;
-    if (key == 13) {  // the enter key code
-      triggerSearch();
-    }
-  });
-  $(".search__add-filter").on("click", (e) => {
-    e.preventDefault();
-    triggerSearch();
+  $(".search__input").each((i, el) => {
+    const instance = new FullTextSearchField($(el), instance => triggerSearch());
   });
   window.addEventListener("popstate", onPopstate);
 
@@ -330,4 +354,3 @@ function searchPage(pageData) {
 } // end search page
 
 searchPage();
-console.log("heere2")
