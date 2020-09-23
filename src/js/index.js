@@ -71,13 +71,10 @@ const fullTextNameToQueryField = {
 };
 
 class DropdownOption {
-  constructor(template, optionItem) {
-    this.element = template.clone();
+  constructor(activeTemplate, inactiveTemplate, optionItem) {
+    this.element = optionItem.selected ? activeTemplate.clone() : inactiveTemplate.clone();
     this.element.find(".dropdown-link__text").text(optionItem.label);
     this.element.find(".facet-count").text(optionItem.count);
-    if (optionItem.selected !== true) {
-      this.element.find(".dropdown-link__check div").removeClass("fa fa-check");
-    }
   }
 }
 
@@ -86,9 +83,12 @@ class DropdownField {
     this.element = element;
     this.queryField = queryField;
     this.submitCallbacks = [];
-    this.optionTemplate = element.find(".dropdown-list__active").clone();
-    this.optionTemplate.find(".dropdown-link__text").text("");
-    this.optionTemplate.find(".dropdown-link__text + div").addClass("facet-count").text("");
+    this.activeOptionTemplate = element.find(".dropdown-list__active").clone();
+    this.inactiveOptionTemplate = element.find(".dropdown-list__links").clone();
+    this.activeOptionTemplate.find(".dropdown-link__text").text("");
+    this.activeOptionTemplate.find(".dropdown-link__text + div").addClass("facet-count").text("");
+    this.inactiveOptionTemplate.find(".dropdown-link__text").text("");
+    this.inactiveOptionTemplate.find(".dropdown-link__text + div").addClass("facet-count").text("");
 
     this.reset();
   }
@@ -98,9 +98,10 @@ class DropdownField {
   }
 
   updateOptions(options) {
-    options.foreach(optionItem => {
-      const option = new DropdownOption(optionItem);
-      optionEl.find(".dropdown-list__inner").append(option.element);
+    options.forEach(optionItem => {
+      const option = new DropdownOption(
+        this.activeOptionTemplate, this.inactiveOptionTemplate, optionItem);
+      this.element.find(".dropdown-list__inner").append(option.element);
     });
   }
 
