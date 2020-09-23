@@ -34,6 +34,8 @@ const pageState = {
   listRequest: null,
   resultRowTemplate: null,
   dropdownItemTemplate: null,
+  loadMoreButton: null,
+  loadMoreButtonTemplate: null,
 };
 
 const baseLocation = "https://data.keepthereceipt.org.za/api/purchase_records/";
@@ -131,7 +133,6 @@ function updateResultList(url) {
 }
 
 // const getNoResultsMessage = () => $("#result-list-container * .w-dyn-empty");
-const getLoadMoreResultsButton = () => $(".load-more");
 const getAllResultListItems = () => $("#result-list-container .narrow-card_wrapper");
 const getNumResultsContainer = () => $("#results-value strong");
 
@@ -166,6 +167,15 @@ class FullTextSearchField {
   }
 }
 
+class PurchaseRecord {
+  constructor(template, resultsItem) {
+    this.element = template.clone();
+    this.element.find(".row-title").text(resultsItem.supplier_name);
+    this.element.find(".row-body").text(resultsItem.buyer_name);
+    this.element.find(".row-body").text(resultsItem.amount_value_zar);
+  }
+}
+
 function resetFacets() {
   getNumResultsContainer().text("...");
   resetDropdown("#government-dropdown");
@@ -178,9 +188,8 @@ function resetFacets() {
 function resetResultList() {
   getAllResultListItems().remove();
   // getNoResultsMessage().hide();
-  getLoadMoreResultsButton()
-    .hide()
-    .off("click");
+  if (pageState.loadMoreButton)
+    pageState.loadMoreButton.remove();
 }
 
 function triggerSearch(pushHistory = true) {
@@ -198,22 +207,17 @@ function addListResults(response) {
   if (response.results.length) {
     // getNoResultsMessage().hide();
     response.results.forEach(function(item) {
-      var resultItem = pageState.resultRowTemplate.clone();
-      resultItem.find(".narrow-card_title").text(project.name);
-      resultItem.find(".narrow-card_middle-column:first").text(project.status);
-      resultItem.find(".narrow-card_middle-column:last").text(project.estimated_completion_date);
-      resultItem.find(".narrow-card_last-column").remove();
-      $("#result-list-container").append(resultItem);
+      let purchaseRecord = new PurchaseRecord(pageState.resultRowTemplate, item);
+      $(".filtered-list").append(purchaseRecord.element);
     });
 
     if (response.next) {
-      const nextButton = getLoadMoreResultsButton();
-      nextButton.off("click");
-      nextButton.on("click", (e) => {
+      pageState.loadMoreButton = pageState.loadMoreButtonTemplate.clone();
+      pageState.loadMoreButton.on("click", (e) => {
         e.preventDefault();
         updateResultList(response.next);
       });
-      nextButton.show();
+      $(".filtered-list").append(pageState.loadMoreButton);
     }
   } else {
     // getNoResultsMessage().show();
@@ -316,8 +320,11 @@ function searchPage(pageData) {
   /** Get templates of dynamically inserted elements **/
 
   const rows = $(".row-dropdown");
-  pageState.resultRowTemplate = $(".row-dropdown").clone();
+  pageState.resultRowTemplate = rows.first().clone();
   rows.remove();
+  const loadMoreButtonDemo = $(".load-more");
+  pageState.loadMoreButtonTemplate = loadMoreButtonDemo.clone();
+  loadMoreButtonDemo.remove();
 
   pageState.dropdownItemTemplate = $(".dropdown-list__active").clone();
   $(".dropdown-list__active").remove();
@@ -328,6 +335,7 @@ function searchPage(pageData) {
   pageState.noFilterChip = $(".no-filter");
   pageState.activeFilterChipTemplate = $(".current-filter").clone();
   pageState.activeFiltersWrapper.empty();
+
 
   $(".filter__download").hide(); // for now
 
