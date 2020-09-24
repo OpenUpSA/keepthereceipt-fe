@@ -38,30 +38,7 @@ const facetPlurals = {
 };
 
 
-function urlFromSearchState() {
-  var params = new URLSearchParams();
-  params.set("q", $("#Infrastructure-Search-Input").val());
-
-  for (let fieldName in pageState.filters) {
-    params.append("filter", `${fieldName}:${pageState.filters[fieldName]}`);
-  }
-
-  // params.set("order_by", pageState.sortField);
-  const queryString = params.toString();
-  return `${window.location.protocol}//${window.location.host}${window.location.pathname}?${queryString}`;
-}
-
-
-function buildListSearchURL() {
-  var params = new URLSearchParams();
-  // params.set("ordering", pageState.sortField);
-  params.set("limit", "20");
-  return baseLocation + "?" + params.toString();
-}
-
 // const getNoResultsMessage = () => $("#result-list-container * .w-dyn-empty");
-
-
 
 const fullTextNameToQueryField = {
   "Filter-by-supplier": "supplier_full_text",
@@ -71,8 +48,20 @@ const fullTextNameToQueryField = {
 };
 
 class DropdownOption {
-  constructor(activeTemplate, inactiveTemplate, optionItem) {
-    this.element = optionItem.selected ? activeTemplate.clone() : inactiveTemplate.clone();
+  constructor(activeTemplate, inactiveTemplate, selectHandler, deselectHandler, optionItem) {
+    if (optionItem.selected) {
+      this.element = activeTemplate.clone();
+      this.element.click((e => {
+        deselectHandler(optionItem.label);
+        e.preventDefault();
+      }).bind(this));
+    } else {
+      this.element = inactiveTemplate.clone();
+      this.element.click((e => {
+        selectHandler(optionItem.label);
+        e.preventDefault();
+      }).bind(this));
+    }
     this.element.find(".dropdown-link__text").text(optionItem.label);
     this.element.find(".facet-count").text(optionItem.count);
   }
@@ -82,7 +71,8 @@ class DropdownField {
   constructor(element, queryField) {
     this.element = element;
     this.queryField = queryField;
-    this.submitCallbacks = [];
+    this.addFilterHandlers = [];
+    this.removeFilterHandlers = [];
     this.activeOptionTemplate = element.find(".dropdown-list__active").clone();
     this.inactiveOptionTemplate = element.find(".dropdown-list__links").clone();
     this.activeOptionTemplate.find(".dropdown-link__text").text("");
@@ -93,14 +83,28 @@ class DropdownField {
     this.reset();
   }
 
-  addSubmitCallback(callback) {
-    this.submitCallbacks.push(callback);
+  addAddFilterHandler(handler) {
+    this.addFilterHandlers.push(handler);
+  }
+  addRemoveFilterHandler(handler) {
+    this.removeFilterHandlers.push(handler);
+  }
+  handleOptionSelect(value) {
+    this.addFilterHandlers.forEach((f => f(this.queryField, value)).bind(this));
+  }
+  handleOptionDeselect(value) {
+    this.removeFilterHandlers.forEach((f => f(this.queryField, value)).bind(this));
   }
 
   updateOptions(options) {
     options.forEach(optionItem => {
       const option = new DropdownOption(
-        this.activeOptionTemplate, this.inactiveOptionTemplate, optionItem);
+        this.activeOptionTemplate,
+        this.inactiveOptionTemplate,
+        this.handleOptionSelect.bind(this),
+        this.handleOptionDeselect.bind(this),
+        optionItem
+      );
       this.element.find(".dropdown-list__inner").append(option.element);
     });
   }
@@ -225,14 +229,27 @@ class PageState {
       repository: new DropdownField($("#filter-data-repository"), "dataset_version__dataset__repository__name"),
       dataset: new DropdownField($("#filter-source-dataset"), "dataset_version__dataset__name"),
     };
+    for (key in this.facets) {
+      this.facets[key].addAddFilterHandler(this.addFilter.bind(this));
+      this.facets[key].addRemoveFilterHandler(this.removeFilter.bind(this));
+    }
 
     this.resetFacets();
     this.resultsList.reset();
     this.loadSearchStateFromCurrentURL();
     //this.initSortDropdown();
     this.triggerSearch(false);
-
   }
+
+  addFilter(querystringField, value) {
+    this.urlSearchParams.append(querystringField, value);
+    this.triggerSearch(true);
+  }
+  removeFilter(querystringField, value) {
+    console.log("remove", querystringField, value);
+    this.triggerSearch(true);
+  }
+
 
   updateFacetOptions(facets) {
     this.facets.buyerName.updateOptions(facets[this.facets.buyerName.queryField]);
@@ -255,7 +272,7 @@ class PageState {
 
   resetResults() {
     this.numResultsContainer.text("...");
-
+    this.resultsList.reset();
     // getNoResultsMessage().hide();
     if (this.loadMoreButton)
       this.loadMoreButton.remove();
@@ -290,23 +307,31 @@ class PageState {
   }
 
   pushState() {
-    window.history.pushState(null, "", urlFromSearchState());
+    window.history.pushState(null, "", this.pageUrl());
   }
 
   loadSearchStateFromCurrentURL() {
     const queryString = window.location.search.substring(1);
-    const params = new URLSearchParams(queryString);
-
+    this.urlSearchParams = new URLSearchParams(queryString);
 
     // const sortField = params.get("order_by");
     // pageState.sortField = sortField || "status_order";
+  }
+
+  pageUrl() {
+    const queryString = this.urlSearchParams.toString();
+    return `${window.location.protocol}//${window.location.host}${window.location.pathname}?${queryString}`;
+  }
+
+  buildListSearchURL() {
+    return baseLocation + "?" + this.urlSearchParams.toString();
   }
 
   triggerSearch(pushHistory = true) {
     if (pushHistory)
       this.pushState();
 
-    this.updateSearch(buildListSearchURL());
+    this.updateSearch(this.buildListSearchURL());
   };
 
   populateDownloadCSVButton(response) {
@@ -315,38 +340,6 @@ class PageState {
 
 }
 
-function updateDropdown(selector, options, fieldName) {
-  const container = $(selector);
-  const trigger = container.find(".chart-dropdown_trigger");
-  const optionContainer = container.find(".chart-dropdown_list");
-  // Replace webflow tap handlers with our own for opening dropdown
-  trigger.off("tap")
-    .on("click", () => optionContainer.addClass("w--open"));
-
-  const selectedOption = getSelectedOption(fieldName);
-  const currentSelectionLabel = container.find(".text-block");
-
-  if (typeof(selectedOption) == "undefined") {
-    currentSelectionLabel.text("All " + facetPlurals[fieldName]);
-  } else {
-    currentSelectionLabel.text(selectedOption);
-  }
-
-  options.forEach(function (option) {
-    const optionElement = pageState.dropdownItemTemplate.clone();
-    optionElement.find(".search-dropdown_label").text(option.text);
-    if (option.count) {
-      optionElement.find(".search-dropdown_value").text("(" + option.count + ")");
-    }
-    optionElement.click(function(e) {
-      e.preventDefault();
-      pageState.filters[fieldName] = option.text;
-      optionContainer.removeClass("w--open");
-      triggerSearch();
-    });
-    optionContainer.append(optionElement);
-  });
-}
 
 // function initSortDropdown() {
 //   const selector = "#sort-order-dropdown";
