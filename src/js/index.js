@@ -139,8 +139,8 @@ class PurchaseRecord {
   constructor(template, resultsItem) {
     this.element = template.clone();
     this.element.find(".row-title").text(resultsItem.supplier_name);
-    this.element.find(".row-body").text(resultsItem.buyer_name);
-    this.element.find(".row-body").text(resultsItem.amount_value_zar);
+    this.element.find(".row-body:first").text(resultsItem.buyer_name);
+    this.element.find(".row-body:last").text(resultsItem.amount_value_zar);
 
     // expand/collapse
     const rowContentEl = this.element.find(".row-content");
@@ -185,6 +185,7 @@ class ResultsList {
         this.loadMoreButton = this.loadMoreButtonTemplate.clone();
         this.loadMoreButton.on("click", (e) => {
           e.preventDefault();
+          this.loadMoreButton.remove();
           nextCallback();
         });
         $(".filtered-list").append(this.loadMoreButton);
