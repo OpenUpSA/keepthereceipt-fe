@@ -27,6 +27,9 @@
   information in the console to notice and understand errors.
 /***************************************************************/
 
+import {SingleDeleteURLSearchParams as URLSearchParams} from './url-search-params.js';
+
+
 const baseLocation = "https://data.keepthereceipt.org.za/api/purchase_records/";
 
 const facetPlurals = {
@@ -232,7 +235,7 @@ class PageState {
       repository: new DropdownField($("#filter-data-repository"), "dataset_version__dataset__repository__name"),
       dataset: new DropdownField($("#filter-source-dataset"), "dataset_version__dataset__name"),
     };
-    for (key in this.facets) {
+    for (let key in this.facets) {
       this.facets[key].addAddFilterHandler(this.addFilter.bind(this));
       this.facets[key].addRemoveFilterHandler(this.removeFilter.bind(this));
     }
@@ -249,7 +252,7 @@ class PageState {
     this.triggerSearch(true);
   }
   removeFilter(querystringField, value) {
-    console.log("remove", querystringField, value);
+    this.urlSearchParams.deleteMatching(querystringField, value);
     this.triggerSearch(true);
   }
 
