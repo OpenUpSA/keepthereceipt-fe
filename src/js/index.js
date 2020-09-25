@@ -200,6 +200,9 @@ class ResultsList {
   }
 
   reset() {
+    if (this.loadMoreButton)
+      this.loadMoreButton.remove();
+    $(".row-dropdown").remove();
   }
 }
 
@@ -274,13 +277,9 @@ class PageState {
     this.numResultsContainer.text("...");
     this.resultsList.reset();
     // getNoResultsMessage().hide();
-    if (this.loadMoreButton)
-      this.loadMoreButton.remove();
   }
 
-  updateSearch(url) {
-    this.resetResults();
-
+  fetchAndDisplay(url) {
     if (this.listRequest !== null)
       this.listRequest.abort();
 
@@ -288,7 +287,7 @@ class PageState {
       .done((response) => {
         this.populateDownloadCSVButton(response);
         this.numResultsContainer.text(`${response.results.length} of ${response.count}`);
-        const nextCallback = response.next ? () => this.updateSearch(response.next) : null;
+        const nextCallback = response.next ? () => this.fetchAndDisplay(response.next) : null;
         this.resultsList.addResults(response.results, nextCallback);
         this.resetFacets();
         this.updateFacetOptions(response.meta.facets);
@@ -331,7 +330,8 @@ class PageState {
     if (pushHistory)
       this.pushState();
 
-    this.updateSearch(this.buildListSearchURL());
+    this.resetResults();
+    this.fetchAndDisplay(this.buildListSearchURL());
   };
 
   populateDownloadCSVButton(response) {
