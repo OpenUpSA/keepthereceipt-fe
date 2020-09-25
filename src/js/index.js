@@ -119,26 +119,32 @@ class DropdownField {
 }
 
 class FullTextSearchField {
-  constructor(element, submitCallback) {
+  constructor(element, queryField) {
     this.element = element;
-    this.submitCallbacks = [submitCallback];
+    this.queryField = queryField;
+    this.addFilterHandlers = [];
+    this.inputElement = this.element.find(".search__bar");
 
-    this.element.find(".search__bar").keypress(e => {
+    this.inputElement.keypress(e => {
       const key = e.which;
       if (key == 13) {  // the enter key code
         e.preventDefault();
-        this.submit();
+        this.handleSubmit(this.inputElement.val());
       }
     });
 
     this.element.find(".search__add-filter").on("click", (e) => {
       e.preventDefault();
-      this.submit();
+      this.handleSubmit(this.inputeElement.val());
     });
   }
 
-  submit() {
-    this.submitCallbacks.map(callback => callback(this));
+  addAddFilterHandler(handler) {
+    this.addFilterHandlers.push(handler);
+  }
+
+  handleSubmit(value) {
+    this.addFilterHandlers.forEach((f => f(this.queryField, value)).bind(this));
   }
 }
 
@@ -221,9 +227,12 @@ class PageState {
     this.resultsList = new ResultsList();
     window.addEventListener("popstate", this.handleHistoryPopstate);
 
-    $(".search__input").each((i, el) => {
-      const instance = new FullTextSearchField($(el), instance => this.triggerSearch());
-    });
+    this.fullTextFields = {
+      supplierName: new FullTextSearchField($("#Filter-by-supplier").parents(".search__input"), "supplier_full_text"),
+    };
+    for (let key in this.fullTextFields) {
+      this.fullTextFields[key].addAddFilterHandler(this.addFilter.bind(this));
+    }
 
     this.facets = {
       buyerName: new DropdownField($("#filter-buyer-name"), "buyer_name"),
