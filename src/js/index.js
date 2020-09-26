@@ -202,7 +202,8 @@ it takes to respond to COVID-19, but to keep the receipts.");
   }
 
   buildListSearchURL() {
-    return baseLocation + "?" + this.urlSearchParams.toString();
+    const baseURL = this.urlSearchParams.get("apiURL") || baseLocation;
+    return baseURL + "?" + this.urlSearchParams.toString();
   }
 
   triggerSearch(pushHistory = true) {
