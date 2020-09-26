@@ -58,13 +58,13 @@ class PageState {
       field.addAddFilterHandler(this.addFilter.bind(this));
     };
 
-    this.facets = {};
+    this.facetFields = {};
     for (let selector in facetFieldMapping) {
       const queryField = facetFieldMapping[selector];
       const field = new DropdownField($(selector), queryField);
-      this.facets[queryField] = field;
-      this.facets[queryField].addAddFilterHandler(this.addFilter.bind(this));
-      this.facets[queryField].addRemoveFilterHandler(this.removeFilter.bind(this));
+      this.facetFields[queryField] = field;
+      this.facetFields[queryField].addAddFilterHandler(this.addFilter.bind(this));
+      this.facetFields[queryField].addRemoveFilterHandler(this.removeFilter.bind(this));
     }
 
     this.resetFacets();
@@ -92,17 +92,25 @@ class PageState {
         this.filterChips.add(field.label, queryField, value, this.removeFilter.bind(this));
       });
     }
+
+    for (let queryField in this.facetFields) {
+      const field = this.facetFields[queryField];
+      const filters = this.urlSearchParams.getAll(queryField);
+      filters.forEach(value => {
+        this.filterChips.add(field.label, queryField, value, this.removeFilter.bind(this));
+      });
+    }
   }
 
   updateFacetOptions(facets) {
-    for (let queryField in this.facets) {
-      this.facets[queryField].updateOptions(facets[queryField]);
+    for (let queryField in this.facetFields) {
+      this.facetFields[queryField].updateOptions(facets[queryField]);
     }
   }
 
   resetFacets() {
-    for (let queryField in this.facets) {
-      this.facets[queryField].reset();
+    for (let queryField in this.facetFields) {
+      this.facetFields[queryField].reset();
     }
   }
 

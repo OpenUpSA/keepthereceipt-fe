@@ -21,6 +21,7 @@ class DropdownOption {
 export class DropdownField {
   constructor(element, queryField) {
     this.element = element;
+    this.label = this.element.parents(".filter").find(".label").text();
     this.queryField = queryField;
     this.addFilterHandlers = [];
     this.removeFilterHandlers = [];
