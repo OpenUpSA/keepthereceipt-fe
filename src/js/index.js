@@ -65,6 +65,7 @@ class PageState {
 
     this.numResultsContainer = $("#results-value strong");
     $(".filter__download").hide(); // for now
+    $(".filter__sorting").hide(); // for now
     this.resultsList = new ResultsList();
     window.addEventListener("popstate", this.handleHistoryPopstate);
 
