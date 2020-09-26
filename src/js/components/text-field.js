@@ -11,12 +11,14 @@ export class FullTextSearchField {
       if (key == 13) {  // the enter key code
         e.preventDefault();
         this.handleSubmit(this.inputElement.val());
+        this.inputElement.val("");
       }
     });
 
     this.element.find(".search__add-filter").on("click", (e) => {
       e.preventDefault();
-      this.handleSubmit(this.inputeElement.val());
+      this.handleSubmit(this.inputElement.val());
+      this.inputElement.val("");
     });
   }
 

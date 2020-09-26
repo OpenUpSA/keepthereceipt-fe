@@ -61,6 +61,10 @@ const facetFieldMapping = {
 
 class PageState {
   constructor() {
+    $(".site-description").text("Explore the goods and services \
+ordered by national and provincial departments and public entities \
+in response to COVID-19.\n\nThe IMF recommended that governments do whatever \
+it takes to respond to COVID-19, but to keep the receipts.");
     this.listRequest = null;
 
     this.numResultsContainer = $("#results-value strong");
