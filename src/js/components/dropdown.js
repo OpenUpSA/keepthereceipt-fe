@@ -13,7 +13,9 @@ class DropdownOption {
         e.preventDefault();
       }).bind(this));
     }
-    this.element.find(".dropdown-link__text").text(optionItem.label);
+    const optionLabelEl = this.element.find(".dropdown-link__text");
+    optionLabelEl.text(optionItem.label);
+    optionLabelEl.attr("title", optionItem.label);
     this.element.find(".facet-count").text(optionItem.count);
   }
 }

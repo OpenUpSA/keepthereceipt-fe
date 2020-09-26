@@ -5,8 +5,13 @@ class PurchaseRecord {
     this.contentRowTemplate = contentRowDemo.first().clone();
     contentRowDemo.remove();
     this.contentRowContainer = this.element.find(".row-content__inner");
-    this.element.find(".row-title").text(resultsItem.supplier_name);
-    this.element.find(".row-body:first").text(resultsItem.buyer_name);
+    const supplierNameEl = this.element.find(".row-title");
+    supplierNameEl.text(resultsItem.supplier_name);
+    supplierNameEl.attr("title", resultsItem.supplier_name);
+
+    const buyerNameEl = this.element.find(".row-body:first");
+    buyerNameEl.text(resultsItem.buyer_name);
+    buyerNameEl.attr("title", resultsItem.buyer_name);
     this.element.find(".row-body:last").text(resultsItem.amount_value_zar);
 
     // expand/collapse
