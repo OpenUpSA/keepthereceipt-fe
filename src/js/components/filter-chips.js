@@ -4,7 +4,7 @@ class FilterChip {
     this.element = template.clone();
     this.queryField = queryField;
     this.value = value;
-    const label = `${fieldLabel} ${this.value}`;
+    const label = `${fieldLabel}: ${this.value}`;
     this.element.find(".current-filter__label").text(label);
     this.element.find(".current-filter__close").click(this.handleRemove.bind(this));
   }

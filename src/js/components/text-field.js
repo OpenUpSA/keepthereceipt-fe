@@ -1,10 +1,10 @@
 export class FullTextSearchField {
-  constructor(element, queryField) {
+  constructor(element, label, queryField) {
     this.element = element;
     this.queryField = queryField;
     this.addFilterHandlers = [];
     this.inputElement = this.element.find(".search__bar");
-    this.label = this.element.parents(".filter").find(".label").text();
+    this.label = label;
 
     this.inputElement.keypress(e => {
       const key = e.which;

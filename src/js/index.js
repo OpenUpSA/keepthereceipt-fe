@@ -16,20 +16,47 @@ const baseLocation = "https://data.keepthereceipt.org.za/api/purchase_records/";
 // const getNoResultsMessage = () => $("#result-list-container * .w-dyn-empty");
 
 const fullTextFieldMapping = {
-  "#Filter-by-supplier": "supplier_full_text",
-  "#Filter-by-director-name": "directors_full_text",
-  "#Filter-by-item-description": "description_full_text",
-  "#Filter-by-procurement-method": "procurement_method_full_text",
+  "#Filter-by-supplier": {queryField: "supplier_full_text", label: "Supplier"},
+  "#Filter-by-director-name": {
+    queryField: "directors_full_text",
+    label: "Director names"
+  },
+  "#Filter-by-item-description": {
+    queryField: "description_full_text",
+    label: "Description"
+  },
+  "#Filter-by-procurement-method": {
+    queryField: "procurement_method_full_text",
+    label: "Procurement method"
+  },
 };
 
 const facetFieldMapping = {
-  "#filter-buyer-name": "buyer_name",
-  "#filter-facility": "implementation_location_facility",
-  "#filter-district-muni": "implementation_location_district_municipality",
-  "#filter-local-muni": "implementation_location_local_municipality",
-  "#filter-province": "implementation_location_province",
-  "#filter-data-repository": "dataset_version__dataset__repository__name",
-  "#filter-source-dataset": "dataset_version__dataset__name",
+  "#filter-buyer-name": {queryField: "buyer_name", label: "Buyer name"},
+  "#filter-facility": {
+    queryField: "implementation_location_facility",
+    label: "Facility"
+  },
+  "#filter-district-muni": {
+    queryField: "implementation_location_district_municipality",
+    label: "District Municipality"
+  },
+  "#filter-local-muni": {
+    queryField: "implementation_location_local_municipality",
+    label: "Local Municipality"
+  },
+  "#filter-province": {
+    queryField: "implementation_location_province",
+    label: "Province"
+  },
+  "#filter-data-repository": {
+    queryField: "dataset_version__dataset__repository__name",
+    label: "Repository"
+  },
+  "#filter-source-dataset": {
+    queryField: "dataset_version__dataset__name",
+    label: "Dataset"
+  },
 };
 
 class PageState {
@@ -49,9 +76,12 @@ class PageState {
 
     this.fullTextFields = {};
     for (let selector in fullTextFieldMapping) {
-      const queryField = fullTextFieldMapping[selector];
+      const mapping = fullTextFieldMapping[selector];
+      const queryField = mapping.queryField;
+      const label = mapping.label;
       const field = new FullTextSearchField(
         $(selector).parents(".search__input"),
+        label,
         queryField
       );
       this.fullTextFields[queryField] = field;
@@ -60,8 +90,10 @@ class PageState {
 
     this.facetFields = {};
     for (let selector in facetFieldMapping) {
-      const queryField = facetFieldMapping[selector];
-      const field = new DropdownField($(selector), queryField);
+      const mapping = facetFieldMapping[selector];
+      const queryField = mapping.queryField;
+      const label = mapping.label;
+      const field = new DropdownField($(selector), label, queryField);
       this.facetFields[queryField] = field;
       this.facetFields[queryField].addAddFilterHandler(this.addFilter.bind(this));
       this.facetFields[queryField].addRemoveFilterHandler(this.removeFilter.bind(this));
@@ -127,7 +159,7 @@ class PageState {
     this.listRequest = $.get(url)
       .done((response) => {
         this.populateDownloadCSVButton(response);
-        this.numResultsContainer.text(`${response.results.length} of ${response.count}`);
+        this.numResultsContainer.text(`${response.count} records`);
         const nextCallback = response.next ? () => this.fetchAndDisplay(response.next) : null;
         this.resultsList.addResults(response.results, nextCallback);
         this.resetFacets();
