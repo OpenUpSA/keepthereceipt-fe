@@ -68,7 +68,7 @@ it takes to respond to COVID-19, but to keep the receipts.");
     this.listRequest = null;
 
     this.numResultsContainer = $("#results-value strong");
-    $(".filter__download").hide(); // for now
+    this.downloadButton = $(".filter__download");
     $(".filter__sorting").hide(); // for now
     this.resultsList = new ResultsList();
     window.addEventListener("popstate", this.handleHistoryPopstate.bind(this));
@@ -154,6 +154,7 @@ it takes to respond to COVID-19, but to keep the receipts.");
   resetResults() {
     this.numResultsContainer.text("...");
     this.resultsList.reset();
+    this.downloadButton.hide();
     // getNoResultsMessage().hide();
   }
 
@@ -163,7 +164,7 @@ it takes to respond to COVID-19, but to keep the receipts.");
 
     this.listRequest = $.get(url)
       .done((response) => {
-        this.populateDownloadCSVButton(response);
+        this.populateDownloadButton(response.meta.xlsx_url);
         this.numResultsContainer.text(`${response.count} records`);
         const nextCallback = response.next ? () => this.fetchAndDisplay(response.next) : null;
         this.resultsList.addResults(response.results, nextCallback);
@@ -214,8 +215,9 @@ it takes to respond to COVID-19, but to keep the receipts.");
     this.fetchAndDisplay(this.buildListSearchURL());
   };
 
-  populateDownloadCSVButton(response) {
-    $("#search-results-download-button").attr("href", response.csv_download_url);
+  populateDownloadButton(xlsx_url) {
+    this.downloadButton.attr("href", xlsx_url);
+    this.downloadButton.show();
   }
 
 }
