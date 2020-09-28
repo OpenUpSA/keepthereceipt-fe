@@ -12,7 +12,7 @@ class PurchaseRecord {
     const buyerNameEl = this.element.find(".row-body:first");
     buyerNameEl.text(resultsItem.buyer_name);
     buyerNameEl.attr("title", resultsItem.buyer_name);
-    this.element.find(".row-body:last").text(resultsItem.amount_value_zar);
+    this.element.find(".row-body:last").text(resultsItem.order_amount_zar);
 
     // expand/collapse
     const rowContentEl = this.element.find(".row-content");
