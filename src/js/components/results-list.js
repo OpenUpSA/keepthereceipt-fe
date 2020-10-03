@@ -42,16 +42,25 @@ class PurchaseRecord {
 
 export class ResultsList {
   constructor() {
+    this.element = $(".filtered-list");
     this.loadMoreButton = null;
-    this.loadMoreButtonTemplate = null;
     this.resultRowTemplate = null;
+    const loadingRowDemo = $(".filtered-list__loading");
+    this.loadingRowTemplate = loadingRowDemo.clone();
     const rows = $(".row-dropdown");
     this.resultRowTemplate = rows.first().clone();
     rows.remove();
-    const loadMoreButtonDemo = $(".load-more");
+    const loadMoreButtonDemo = $("#load-more");
     this.loadMoreButtonTemplate = loadMoreButtonDemo.clone();
-    loadMoreButtonDemo.remove();
+    this.reset();
+  }
 
+  startLoading() {
+    this.element.append(this.loadingRowTemplate.clone());
+  }
+
+  stopLoading() {
+    $(".filtered-list__loading").remove();
   }
 
   addResults(results, nextCallback) {
@@ -66,10 +75,10 @@ export class ResultsList {
         this.loadMoreButton = this.loadMoreButtonTemplate.clone();
         this.loadMoreButton.on("click", (e) => {
           e.preventDefault();
-          this.loadMoreButton.remove();
+          $("#load-more").remove();
           nextCallback();
         });
-        $(".filtered-list").append(this.loadMoreButton);
+        this.element.append(this.loadMoreButton);
       }
     } else {
       // getNoResultsMessage().show();
@@ -78,7 +87,7 @@ export class ResultsList {
 
   reset() {
     if (this.loadMoreButton)
-      this.loadMoreButton.remove();
+      $("#load-more").remove();
     $(".row-dropdown").remove();
   }
 }
