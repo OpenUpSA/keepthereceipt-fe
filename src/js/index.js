@@ -71,14 +71,11 @@ it takes to respond to COVID-19, but to keep the receipts.");
     this.downloadButton = $(".filter__download");
     $(".filter__sorting").hide(); // for now
     $(".header-icon").hide(); // for now
+    $(".view-buttons").hide(); // for now
     this.resultsList = new ResultsList();
     window.addEventListener("popstate", this.handleHistoryPopstate.bind(this));
 
-    this.filterChips = new FilterChips(
-      $(".current-filters__wrap"),
-      $(".no-filter").clone(),
-      $(".current-filter").clone()
-    );
+    this.filterChips = new FilterChips($(".current-filters__wrap"));
 
     this.fullTextFields = {};
     for (let selector in fullTextFieldMapping) {
@@ -163,11 +160,14 @@ it takes to respond to COVID-19, but to keep the receipts.");
     if (this.listRequest !== null)
       this.listRequest.abort();
 
+    this.resultsList.startLoading();
+
     this.listRequest = $.get(url)
       .done((response) => {
         this.populateDownloadButton(response.meta.xlsx_url);
         this.numResultsContainer.text(`${response.count} records`);
         const nextCallback = response.next ? () => this.fetchAndDisplay(response.next) : null;
+        this.resultsList.stopLoading();
         this.resultsList.addResults(response.results, nextCallback);
         this.resetFacets();
         this.updateFacetOptions(response.meta.facets);

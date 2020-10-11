@@ -1,18 +1,29 @@
-class PurchaseRecord {
-  constructor(template, resultsItem) {
-    this.element = template.clone();
+class RowDropdown {
+  template = $(".styles > .row-dropdown");
+
+  constructor(resultsItem) {
+    this.element = this.template.clone();
+    console.assert(this.element.length === 1);
+
     const contentRowDemo = this.element.find(".row-content__item");
     this.contentRowTemplate = contentRowDemo.first().clone();
     contentRowDemo.remove();
+
     this.contentRowContainer = this.element.find(".row-content__inner");
+
     const supplierNameEl = this.element.find(".row-title");
+    console.assert(supplierNameEl.length === 1);
     supplierNameEl.text(resultsItem.supplier_name);
     supplierNameEl.attr("title", resultsItem.supplier_name);
 
     const buyerNameEl = this.element.find(".row-body:first");
+    console.assert(buyerNameEl.length === 1);
     buyerNameEl.text(resultsItem.buyer_name);
     buyerNameEl.attr("title", resultsItem.buyer_name);
-    this.element.find(".row-body:last").text(resultsItem.order_amount_zar);
+
+    const orderAmountEl = this.element.find(".row-body:last");
+    console.assert(orderAmountEl.length === 1);
+    orderAmountEl.text(resultsItem.order_amount_zar);
 
     // expand/collapse
     const rowContentEl = this.element.find(".row-content");
@@ -42,34 +53,44 @@ class PurchaseRecord {
 
 export class ResultsList {
   constructor() {
-    this.loadMoreButton = null;
-    this.loadMoreButtonTemplate = null;
-    this.resultRowTemplate = null;
-    const rows = $(".row-dropdown");
-    this.resultRowTemplate = rows.first().clone();
-    rows.remove();
-    const loadMoreButtonDemo = $(".load-more");
-    this.loadMoreButtonTemplate = loadMoreButtonDemo.clone();
-    loadMoreButtonDemo.remove();
+    this.element = $(".main .filtered-list");
+    console.assert(this.element.length === 1);
 
+    const loadingRowDemo = $(".filtered-list__loading");
+    this.loadingRowTemplate = loadingRowDemo.clone();
+    console.assert(this.loadingRowTemplate.length === 1);
+
+    const loadMoreButtonDemo = $("#load-more");
+    this.loadMoreButtonTemplate = loadMoreButtonDemo.clone();
+    console.assert(this.loadMoreButtonTemplate.length === 1);
+
+    this.reset();
+  }
+
+  startLoading() {
+    this.element.append(this.loadingRowTemplate.clone());
+  }
+
+  stopLoading() {
+    this.element.find(".filtered-list__loading").remove();
   }
 
   addResults(results, nextCallback) {
     if (results.length) {
       // getNoResultsMessage().hide();
       results.forEach(item => {
-        let purchaseRecord = new PurchaseRecord(this.resultRowTemplate, item);
-        $(".filtered-list").append(purchaseRecord.element);
+        let purchaseRecord = new RowDropdown(item);
+        this.element.append(purchaseRecord.element);
       });
 
       if (nextCallback !== null) {
         this.loadMoreButton = this.loadMoreButtonTemplate.clone();
         this.loadMoreButton.on("click", (e) => {
           e.preventDefault();
-          this.loadMoreButton.remove();
+          $("#load-more").remove();
           nextCallback();
         });
-        $(".filtered-list").append(this.loadMoreButton);
+        this.element.append(this.loadMoreButton);
       }
     } else {
       // getNoResultsMessage().show();
@@ -78,7 +99,7 @@ export class ResultsList {
 
   reset() {
     if (this.loadMoreButton)
-      this.loadMoreButton.remove();
-    $(".row-dropdown").remove();
+      $("#load-more").remove();
+    this.element.find(".row-dropdown").remove();
   }
 }
