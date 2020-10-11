@@ -17,6 +17,7 @@ Bundles are placed in `dist`
     yarn
     yarn build
 
+Set the environment variable at build GOOGLE_TAG_MANAGER_ID to enable Google Tag Manager
 
 ## Webflow updates
 
