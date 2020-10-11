@@ -258,7 +258,7 @@ const pageState = new PageState();
 // Template literal for parcel to replace on build
 const GOOGLE_TAG_MANAGER_ID = `${process.env.GOOGLE_TAG_MANAGER_ID}`;
 
-if (GOOGLE_TAG_MANAGER_ID) {
+if (`${process.env.CONTEXT}` === "production" && GOOGLE_TAG_MANAGER_ID) {
   (function(w,d,s,l,i) {
     w[l] = w[l] || [];
     w[l].push({
