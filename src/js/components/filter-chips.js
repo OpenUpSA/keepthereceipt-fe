@@ -1,7 +1,9 @@
 class FilterChip {
-  constructor(template, fieldLabel, queryField, value) {
+  template = $(".styles .current-filter").first();
+
+  constructor(fieldLabel, queryField, value) {
     this.removeFilterHandlers = [];
-    this.element = template.clone();
+    this.element = this.template.clone();
     this.queryField = queryField;
     this.value = value;
     const label = `${fieldLabel}: ${this.value}`;
@@ -20,10 +22,8 @@ class FilterChip {
 }
 
 export class FilterChips {
-  constructor(element, noFilterChipTemplate, activeFilterChipTemplate) {
+  constructor(element) {
     this.element = element;
-    this.noFilterChipTemplate = noFilterChipTemplate;
-    this.activeFilterChipTemplate = activeFilterChipTemplate;
     this.reset();
   }
 
@@ -32,8 +32,7 @@ export class FilterChips {
   }
 
   add(fieldLabel, queryField, value, removeFilterHandler) {
-    const chip = new FilterChip(
-      this.activeFilterChipTemplate, fieldLabel, queryField, value);
+    const chip = new FilterChip(fieldLabel, queryField, value);
     chip.addRemoveFilterHandler(removeFilterHandler);
     this.element.append(chip.element);
   }
