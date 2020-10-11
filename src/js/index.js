@@ -71,6 +71,7 @@ it takes to respond to COVID-19, but to keep the receipts.");
     this.downloadButton = $(".filter__download");
     $(".filter__sorting").hide(); // for now
     $(".header-icon").hide(); // for now
+    $(".view-buttons").hide(); // for now
     this.resultsList = new ResultsList();
     window.addEventListener("popstate", this.handleHistoryPopstate.bind(this));
 
