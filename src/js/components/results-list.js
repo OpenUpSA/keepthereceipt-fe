@@ -40,14 +40,32 @@ class RowDropdown {
       rowContentEl.slideToggle();
     });
 
-    for (let field in resultsItem) {
-      if (resultsItem[field] !== null && resultsItem[field] !== "") {
-        const rowEl = this.contentRowTemplate.clone();
-        rowEl.find(".label").text(field);
-        rowEl.find(".description-block").text(resultsItem[field]);
-        this.contentRowContainer.append(rowEl);
+    const addDetail = (keys, value) => {
+      for (let key in value) {
+        if (key === "id")
+          continue;
+
+        const nestedKey = [...keys, key];
+        const nestedValue = value[key];
+        if (typeof(nestedValue) === "object") {
+          addDetail(nestedKey, nestedValue);
+        } else if (nestedValue !== null && nestedValue !== "") {
+          const item = new RowDropdownItem(this.contentRowTemplate, nestedKey.join("."), nestedValue);
+          this.contentRowContainer.append(item.element);
+        }
       }
-    }
+    };
+    addDetail([], resultsItem);
+  }
+}
+
+class RowDropdownItem {
+  constructor(template, key, value) {
+    this.element = template.clone();
+    this.element.find(".label").text(key);
+    this.element.find(".label").attr("title", key);
+    this.element.find(".description-block").text(value);
+    this.element.find(".description-block").attr("title", value);
   }
 }
 
