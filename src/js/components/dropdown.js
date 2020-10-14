@@ -21,11 +21,11 @@ class DropdownOption {
     this.element.find(".dropdown-link__text + div").addClass("facet-count").text("");
 
     const optionLabelEl = this.element.find(".dropdown-link__text");
-    if (optionItem.label) {
-      optionLabelEl.text(optionItem.label);
-    } else {
+    if (optionItem.label === "") {
       optionLabelEl.text("Blank");
       optionLabelEl.css('font-style', 'italic');
+    } else {
+      optionLabelEl.text(optionItem.label);
     }
     optionLabelEl.attr("title", optionItem.label);
     this.element.find(".facet-count").text(optionItem.count);
