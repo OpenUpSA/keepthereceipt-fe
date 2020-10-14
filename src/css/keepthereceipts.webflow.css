@@ -1228,12 +1228,15 @@ a {
   right: 0%;
   bottom: auto;
   z-index: 100;
-  display: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
   height: 10px;
   background-image: url('../images/perforation.svg');
   background-position: 50% 50%;
   background-size: auto 10px;
-  background-repeat: no-repeat;
+  background-repeat: repeat-x;
   background-attachment: scroll;
 }
 
@@ -1249,7 +1252,10 @@ a {
   right: 0%;
   bottom: -10px;
   z-index: 100;
-  display: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
   height: 10px;
   background-image: url('../images/perforation-bottom.svg');
   background-position: 50% 50%;
@@ -1562,12 +1568,15 @@ a {
     padding: 0px;
   }
   .procurement-search {
+    margin-top: 16px;
+    margin-bottom: 16px;
     padding: 30px 16px;
   }
   .page-title {
     font-size: 24px;
   }
   .row-content__item {
+    justify-items: start;
     grid-row-gap: 4px;
     grid-template-areas: "Input" "Value";
     -ms-grid-columns: 180fr;
