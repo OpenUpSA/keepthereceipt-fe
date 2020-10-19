@@ -1,4 +1,4 @@
-<!DOCTYPE html><!--  This site was created in Webflow. http://www.webflow.com  --><!--  Last Published: Mon Oct 12 2020 07:07:40 GMT+0000 (Coordinated Universal Time)  --><html data-wf-page="5f5f5033b4197bfe5f5c5613" data-wf-site="5f5f5033b4197b342a5c5612"><head>
+<!DOCTYPE html><!--  This site was created in Webflow. http://www.webflow.com  --><!--  Last Published: Mon Oct 19 2020 19:31:10 GMT+0000 (Coordinated Universal Time)  --><html data-wf-page="5f5f5033b4197bfe5f5c5613" data-wf-site="5f5f5033b4197b342a5c5612"><head>
   <meta charset="utf-8">
   <title>Keep the Receipts</title>
   <meta content="width=device-width, initial-scale=1" name="viewport">
@@ -161,21 +161,8 @@
                     </div>
                     <nav class="dropdown-list w-dropdown-list">
                       <div class="dropdown-list__inner scroll">
-                        <div class="dropdown-list__active">
-                          <a href="#" class="dropdown-link dropdown-link--facet active w-inline-block">
-                            <div class="dropdown-link__check">
-                              <div class="fa fa-check"></div>
-                            </div>
-                            <div class="dropdown-link__text truncate">This is some text inside of a div block.</div>
-                            <div>000</div>
-                          </a>
-                        </div>
-                        <div class="dropdown-list__links">
-                          <a href="#" class="dropdown-link dropdown-link--facet w-inline-block">
-                            <div class="dropdown-link__text truncate">This is some text inside of a div block.</div>
-                            <div>000</div>
-                          </a>
-                        </div>
+                        <div class="dropdown-list__active"></div>
+                        <div class="dropdown-list__links"></div>
                       </div>
                     </nav>
                   </div>
@@ -288,10 +275,32 @@
           <div id="w-node-9837c765a781-5f5c5613" class="row-body truncate">Buyer</div>
           <div id="w-node-97425daed04d-5f5c5613" class="row-body row-body--last truncate">Value</div>
         </div>
+        <div class="row-dropdown">
+          <div class="row-bg"></div>
+          <div class="row row-dropdown__toggle">
+            <div id="w-node-ceef27c6b1e0-5f5c5613" class="row-body truncate">Buyer name</div>
+            <h3 id="w-node-ceef27c6b1e2-5f5c5613" class="row-title truncate">Supplier name</h3>
+            <div id="w-node-ceef27c6b1e4-5f5c5613" class="row-body row-body--last truncate">R000000000</div>
+            <div class="row-icon-open">
+              <div class="fa fa-caret-down"></div>
+            </div>
+            <div class="row-icon-close">
+              <div class="fa fa-caret-up"></div>
+            </div>
+          </div>
+          <div class="row-content">
+            <div class="row-content__inner">
+              <div class="row-content__item">
+                <div id="w-node-ceef27c6b1ed-5f5c5613" class="label"></div>
+                <div id="w-node-ceef27c6b1ef-5f5c5613" class="description-block w-richtext"></div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="filtered-list__loading"><img src="images/loading.gif" loading="lazy" alt="" class="image"></div>
       </div>
       <div class="divider"></div>
-      <div class="footer"><img src="images/footer-logo.png" loading="lazy" width="298.5" id="w-node-9a3b4dcf69ad-5f5c5613" srcset="images/footer-logo-p-500.png 500w, images/footer-logo.png 597w" sizes="298.5px" alt="" class="footer-logo">
+      <div class="footer"><img src="images/footer-logo.png" loading="lazy" width="298.5" id="w-node-9a3b4dcf69ad-5f5c5613" srcset="images/footer-logo-p-500.png 500w, images/footer-logo.png 597w" sizes="(max-width: 479px) 100vw, 298.5px" alt="" class="footer-logo">
         <div id="w-node-5307d05e7e4a-5f5c5613">An open data tool created by <a href="http://www.psam.org.za" target="_blank">Public Service Accountability Monitor</a> and <a href="http://www.openup.org.za" target="_blank">OpenUp</a>.</div>
       </div>
       <div class="w-embed">
@@ -643,6 +652,9 @@ border-radius:2px;
 	overflow-y: scroll;
 	overflow-x: hidden; 
 } 
+.row-content__item {
+  	overflow-wrap: anywhere;
+  }
 </style>
 
 <script src="js/index.js"></script></body></html>
