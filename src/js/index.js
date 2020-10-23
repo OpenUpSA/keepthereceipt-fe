@@ -10,6 +10,7 @@ import {DropdownField} from './components/dropdown.js';
 import {FullTextSearchField} from './components/text-field.js';
 import {ResultsList} from './components/results-list.js';
 import {FilterChips} from './components/filter-chips.js';
+import {sendGAEvent} from './util.js';
 
 const baseLocation = "https://data.keepthereceipt.org.za/api/purchase_records/";
 
@@ -106,11 +107,13 @@ it takes to respond to COVID-19, but to keep the receipts.");
     this.resultsList.reset();
     this.loadSearchStateFromCurrentURL();
     //this.initSortDropdown();
+    sendGAEvent("search", "page-load", this.urlSearchParams.toString());
     this.triggerSearch(false);
   }
 
   addFilter(querystringField, value) {
     this.urlSearchParams.append(querystringField, value);
+    sendGAEvent("search", "add-filter", this.urlSearchParams.toString());
     this.triggerSearch(true);
   }
   removeFilter(querystringField, value) {
@@ -183,6 +186,7 @@ it takes to respond to COVID-19, but to keep the receipts.");
 
   handleHistoryPopstate(event) {
     this.loadSearchStateFromCurrentURL();
+    sendGAEvent("search", "history-back", this.urlSearchParams.toString());
     this.triggerSearch(false);
   }
 
