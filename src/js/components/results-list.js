@@ -1,3 +1,5 @@
+import {formatRand, humaniseRand} from '../util.js';
+
 class RowDropdown {
   template = $(".styles > .row-dropdown");
 
@@ -23,7 +25,7 @@ class RowDropdown {
 
     const orderAmountEl = this.element.find(".row-body:last");
     console.assert(orderAmountEl.length === 1);
-    orderAmountEl.text(resultsItem.order_amount_zar);
+    orderAmountEl.text(humaniseRand(resultsItem.order_amount_zar));
 
     // expand/collapse
     const rowContentEl = this.element.find(".row-content");
