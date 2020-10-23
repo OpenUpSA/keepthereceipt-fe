@@ -1,10 +1,23 @@
+import { format as d3Format } from 'd3-format';
+
+export const sendGAEvent = (category, action, label) => {
+  if (!("dataLayer" in window)) {
+    window.dataLayer = [];
+  }
+
+  dataLayer.push({
+    event: category,
+    action: action,
+    label: label,
+  });
+};
+
+
 /**
  *
  * Adapted from https://github.com/vulekamali/data-visualisations/blob/83553e4a4be2ddb166099ef17ea4b41f355818e6/src/util.js
  *
  */
-
-import { format as d3Format } from 'd3-format';
 
 
 export const formatRand = (x, decimals, randSpace) => {
