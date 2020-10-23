@@ -1,4 +1,11 @@
+/**
+ *
+ * Adapted from https://github.com/vulekamali/data-visualisations/blob/83553e4a4be2ddb166099ef17ea4b41f355818e6/src/util.js
+ *
+ */
+
 import { format as d3Format } from 'd3-format';
+
 
 export const formatRand = (x, decimals, randSpace) => {
   decimals = decimals === undefined ? 1 : decimals; // eslint-disable-line no-param-reassign
@@ -21,5 +28,5 @@ export const humaniseRand = (x, longForm) => { // eslint-disable-line import/pre
   } if (!longForm && Math.abs(x) >= 100000) {
     return formatRand(x / 1000, decimals, randSpace) + suffixThousand;
   }
-  return formatRand(x, 0);
+  return formatRand(x, 2);
 };
