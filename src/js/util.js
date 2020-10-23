@@ -21,5 +21,5 @@ export const humaniseRand = (x, longForm) => { // eslint-disable-line import/pre
   } if (!longForm && Math.abs(x) >= 100000) {
     return formatRand(x / 1000, decimals, randSpace) + suffixThousand;
   }
-  return formatRand(x, 0);
+  return formatRand(x, 2);
 };

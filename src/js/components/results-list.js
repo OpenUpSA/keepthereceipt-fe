@@ -26,6 +26,7 @@ class RowDropdown {
     const orderAmountEl = this.element.find(".row-body:last");
     console.assert(orderAmountEl.length === 1);
     orderAmountEl.text(humaniseRand(resultsItem.order_amount_zar));
+    orderAmountEl.attr("title", formatRand(resultsItem.order_amount_zar, 2));
 
     // expand/collapse
     const rowContentEl = this.element.find(".row-content");
@@ -66,8 +67,9 @@ class RowDropdownItem {
     this.element = template.clone();
     this.element.find(".label").text(key);
     this.element.find(".label").attr("title", key);
-    this.element.find(".description-block").text(value);
-    this.element.find(".description-block").attr("title", value);
+    const formattedValue = (value && key.endsWith("_zar")) ? formatRand(value, 2) : value;
+    this.element.find(".description-block").text(formattedValue);
+    this.element.find(".description-block").attr("title", formattedValue);
   }
 }
 
