@@ -5,7 +5,6 @@ export const sendGAEvent = (category, action, label) => {
     window.dataLayer = [];
   }
 
-  console.log("dataLayer send");
   dataLayer.push({
     event: category,
     action: action,
