@@ -107,7 +107,6 @@ it takes to respond to COVID-19, but to keep the receipts.");
     this.resultsList.reset();
     this.loadSearchStateFromCurrentURL();
     //this.initSortDropdown();
-    sendGAEvent("search", "page-load", this.urlSearchParams.toString());
     this.triggerSearch(false);
   }
 
