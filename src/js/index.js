@@ -276,3 +276,10 @@ if (`${process.env.CONTEXT}` === "production" && GOOGLE_TAG_MANAGER_ID) {
     f.parentNode.insertBefore(j,f);
   })(window, document, 'script', 'dataLayer', `${GOOGLE_TAG_MANAGER_ID}`);
 }
+
+
+if (pym) {
+  new pym.Child({ polling: 500 });
+} else {
+  console.log("pym wasn't available");
+}
