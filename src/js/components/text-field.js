@@ -10,15 +10,20 @@ export class FullTextSearchField {
       const key = e.which;
       if (key == 13) {  // the enter key code
         e.preventDefault();
-        this.handleSubmit(this.inputElement.val());
-        this.inputElement.val("");
+
+        if (this.inputElement.val() !== "") {
+          this.handleSubmit(this.inputElement.val());
+          this.inputElement.val("");
+        }
       }
     });
 
     this.element.find(".search__add-filter").on("click", (e) => {
       e.preventDefault();
-      this.handleSubmit(this.inputElement.val());
-      this.inputElement.val("");
+      if (this.inputElement.val() !== "") {
+        this.handleSubmit(this.inputElement.val());
+        this.inputElement.val("");
+      }
     });
   }
 
