@@ -67,9 +67,19 @@ class RowDropdownItem {
     this.element = template.clone();
     this.element.find(".label").text(key);
     this.element.find(".label").attr("title", key);
-    const formattedValue = (value && key.endsWith("_zar")) ? formatRand(value, 2) : value;
-    this.element.find(".description-block").text(formattedValue);
-    this.element.find(".description-block").attr("title", formattedValue);
+    const valueContainer = this.element.find(".description-block");
+    if (/^https?:\/\/\w+\.\w+.+/.exec(value)) {
+      // Create HTML from strings we control, and insert untrusted content as text (not html)
+      const $a = $(`<a href="#"></a>`);
+      $a.attr("href", value);
+      $a.text(value);
+      valueContainer.empty();
+      valueContainer.append($a);
+    } else {
+      const formattedValue = (value && key.endsWith("_zar")) ? formatRand(value, 2) : value;
+      valueContainer.text(formattedValue);
+      valueContainer.attr("title", formattedValue);
+    }
   }
 }
 
