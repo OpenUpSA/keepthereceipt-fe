@@ -12,7 +12,7 @@ import {ResultsList} from './components/results-list.js';
 import {FilterChips} from './components/filter-chips.js';
 import {sendGAEvent} from './util.js';
 
-const baseLocation = "https://data.keepthereceipt.org.za/api/purchase_records/";
+const baseLocation = "https://data.keepthereceipts.org.za/api/purchase_records/";
 
 // const getNoResultsMessage = () => $("#result-list-container * .w-dyn-empty");
 
